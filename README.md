@@ -1,5 +1,3 @@
-# SisReservaDeSalas
-
 # Sistema Web de Reserva de Salas Universitárias
 
 Projeto desenvolvido para a disciplina de Construção de Software da Universidade Estadual de Maringá (UEM).
