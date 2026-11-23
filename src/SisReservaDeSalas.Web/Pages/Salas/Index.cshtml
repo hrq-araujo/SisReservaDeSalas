@@ -10,6 +10,7 @@
         @if (User.IsInRole(Perfis.Administrador))
         {
             <a asp-page="/Salas/Cadastrar" class="btn btn-primary">Cadastrar sala</a>
+            <a asp-page="/Admin/Salas/Index">Gerenciar salas</a>
         }
     </div>
     @if (Model.Salas.Count == 0)

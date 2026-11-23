@@ -1,0 +1,22 @@
+@page "{id:int}"
+@model SisReservaDeSalas.Web.Pages.Admin.Salas.SituacaoModel
+@{
+    ViewData["Title"] = Model.Sala.Ativa ? "Desativar sala" : "Reativar sala";
+}
+<section class="py-4">
+    <h1>@ViewData["Title"]</h1>
+    <p><strong>@Model.Sala.Identificacao</strong> — @Model.Sala.Localizacao</p>
+    @if (Model.Sala.Ativa)
+    {
+        <p>A sala deixará de aceitar novas reservas. As reservas existentes serão mantidas.</p>
+    }
+    else
+    {
+        <p>A sala voltará a aparecer nas consultas. Os horários já reservados continuarão ocupados.</p>
+    }
+    <form method="post">
+        <input type="hidden" name="ativa" value="@((!Model.Sala.Ativa).ToString().ToLowerInvariant())" />
+        <button type="submit" class="btn @(Model.Sala.Ativa ? "btn-danger" : "btn-primary")">Confirmar @(Model.Sala.Ativa ? "desativação" : "reativação")</button>
+        <a asp-page="/Admin/Salas/Index" class="btn btn-outline-secondary">Voltar</a>
+    </form>
+</section>

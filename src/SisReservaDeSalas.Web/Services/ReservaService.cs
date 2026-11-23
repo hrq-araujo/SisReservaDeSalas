@@ -22,6 +22,12 @@ public class ReservaService(ReservaDbContext db)
     {
         Validator.ValidateObject(cadastro, new ValidationContext(cadastro), true);
         ArgumentException.ThrowIfNullOrWhiteSpace(usuarioId);
+        await using var transacao = await db.Database.BeginTransactionAsync();
+        if (db.Database.IsNpgsql())
+        {
+            // Uma desativação concorrente espera a confirmação desta reserva terminar.
+            await db.Database.ExecuteSqlInterpolatedAsync($"SELECT 1 FROM \"Salas\" WHERE \"Id\" = {cadastro.SalaId} FOR SHARE");
+        }
         if (!await db.Salas.AnyAsync(s => s.Id == cadastro.SalaId && s.Ativa))
             return (null, "A sala não está disponível para reserva.");
 
@@ -39,6 +45,7 @@ public class ReservaService(ReservaDbContext db)
         try
         {
             await db.SaveChangesAsync();
+            await transacao.CommitAsync();
             return (reserva.Id, null);
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException

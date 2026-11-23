@@ -1,0 +1,41 @@
+@page
+@model SisReservaDeSalas.Web.Pages.Admin.Salas.IndexModel
+@{
+    ViewData["Title"] = "Gerenciar salas";
+}
+<section class="py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1>Gerenciar salas</h1>
+        <a asp-page="/Salas/Cadastrar" class="btn btn-primary">Cadastrar sala</a>
+    </div>
+    @if (TempData["Sucesso"] is string mensagem)
+    {
+        <div class="alert alert-success" role="status">@mensagem</div>
+    }
+    @if (Model.Salas.Count == 0)
+    {
+        <p>Nenhuma sala cadastrada.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption>Salas ativas e inativas.</caption>
+                <thead><tr><th scope="col">Sala</th><th scope="col">Localização</th><th scope="col">Capacidade</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead>
+                <tbody>
+                    @foreach (var sala in Model.Salas)
+                    {
+                        <tr>
+                            <td>@sala.Identificacao</td><td>@sala.Localizacao</td><td>@sala.Capacidade pessoas</td>
+                            <td>@(sala.Ativa ? "Ativa" : "Inativa")</td>
+                            <td>
+                                <a asp-page="/Admin/Salas/Editar" asp-route-id="@sala.Id" aria-label="Editar @sala.Identificacao">Editar</a>
+                                <a asp-page="/Admin/Salas/Situacao" asp-route-id="@sala.Id" class="ms-3">@(sala.Ativa ? "Desativar" : "Reativar")</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

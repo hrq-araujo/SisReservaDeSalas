@@ -1,0 +1,18 @@
+@page "{id:int}"
+@model SisReservaDeSalas.Web.Pages.Admin.Salas.EditarModel
+@{
+    ViewData["Title"] = "Editar sala";
+}
+<section class="py-4 col-lg-7">
+    <h1>Editar sala</h1>
+    <p>As alterações mantêm as reservas existentes. O campo de recursos é opcional.</p>
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <div class="mb-3"><label asp-for="Cadastro.Identificacao" class="form-label">Identificação</label><input asp-for="Cadastro.Identificacao" class="form-control" maxlength="100" /><span asp-validation-for="Cadastro.Identificacao" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="Cadastro.Localizacao" class="form-label">Localização</label><input asp-for="Cadastro.Localizacao" class="form-control" maxlength="150" /><span asp-validation-for="Cadastro.Localizacao" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="Cadastro.Capacidade" class="form-label">Capacidade (pessoas)</label><input asp-for="Cadastro.Capacidade" class="form-control" min="1" /><span asp-validation-for="Cadastro.Capacidade" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="Cadastro.Recursos" class="form-label">Recursos disponíveis</label><textarea asp-for="Cadastro.Recursos" class="form-control" rows="3" maxlength="500"></textarea><span asp-validation-for="Cadastro.Recursos" class="text-danger"></span></div>
+        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+        <a asp-page="/Admin/Salas/Index" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+</section>

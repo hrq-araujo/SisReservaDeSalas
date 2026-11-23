@@ -67,7 +67,8 @@ e administrador usam ASP.NET Core Identity, com a migration
 `AdicionarAutenticacao`. Administradores podem cadastrar salas; usuários
 autenticados podem listar salas ativas e consultar seus detalhes. A consulta de
 disponibilidade, a confirmação de reservas, a listagem de minhas reservas e
-o cancelamento estão implementados. Ainda não há edição ou desativação de salas.
+o cancelamento estão implementados. Administradores também podem editar,
+desativar e reativar salas. Falta a consulta administrativa de todas as reservas.
 
 O projeto web está em `src/SisReservaDeSalas.Web`. As páginas ficam em `Pages`
 e os arquivos de estilo ficam em `wwwroot`. As entidades ficam em `Models`,
@@ -250,3 +251,32 @@ Os testes verificam o isolamento das listas por usuário, as permissões de
 cancelamento, a proteção do formulário e a preservação do histórico. Com
 `RESERVAS_TEST_POSTGRES` configurada, também executam o cancelamento pela página
 e confirmam no PostgreSQL que uma nova reserva pode ocupar o horário liberado.
+
+## Edição e situação das salas (US08 e US09)
+
+Entre como administrador e abra **Gerenciar salas**. Essa lista inclui salas
+ativas e inativas. Use **Editar** para atualizar identificação, localização,
+capacidade e recursos. A edição mantém a situação da sala e as reservas existentes.
+
+Use **Desativar** ou **Reativar** e confirme a operação na página seguinte.
+Desativar impede novas reservas e retira a sala das consultas comuns, mantendo
+os agendamentos já registrados. Reativar permite novas reservas nos horários
+livres; os agendamentos anteriores continuam bloqueando seus períodos.
+Os usuários continuam podendo consultar e cancelar as próprias reservas mesmo
+quando a sala está inativa.
+
+Essas páginas são exclusivas do perfil administrador. As alterações usam
+formulários protegidos e enviam a situação desejada explicitamente, de modo que
+repetir o envio de uma desativação não reative a sala por acidente.
+
+No PostgreSQL, a confirmação de uma reserva mantém um bloqueio compartilhado
+na sala até terminar sua transação. Isso coordena a confirmação com uma possível
+desativação simultânea: se a desativação concluir primeiro, a nova reserva é
+recusada; se a reserva concluir primeiro, ela permanece registrada. A restrição
+de sobreposição continua protegendo as reservas simultâneas.
+Referência: [bloqueios de linhas no PostgreSQL](https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-ROWS).
+
+Esta parte não altera o esquema do banco. Os testes verificam as permissões,
+os dados inválidos, a preservação das reservas, a reativação e a repetição de
+envios. O teste específico de desativação concorrente usa PostgreSQL real quando
+`RESERVAS_TEST_POSTGRES` está configurada.
