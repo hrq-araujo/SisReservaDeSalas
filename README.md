@@ -68,12 +68,14 @@ e administrador usam ASP.NET Core Identity, com a migration
 autenticados podem listar salas ativas e consultar seus detalhes. A consulta de
 disponibilidade, a confirmação de reservas, a listagem de minhas reservas e
 o cancelamento estão implementados. Administradores também podem editar,
-desativar e reativar salas. Falta a consulta administrativa de todas as reservas.
+desativar e reativar salas e consultar as reservas de todos os usuários.
+As funcionalidades US01 a US10 estão implementadas; a revisão final e os
+registros da entrega devem acompanhar o estado real do desenvolvimento.
 
 O projeto web está em `src/SisReservaDeSalas.Web`. As páginas ficam em `Pages`
 e os arquivos de estilo ficam em `wwwroot`. As entidades ficam em `Models`,
-e o contexto e as migrations ficam em `Data`. Os serviços de negócio serão
-acrescentados junto das funcionalidades, mantendo a arquitetura em camadas.
+e o contexto e as migrations ficam em `Data`. Os serviços de negócio ficam
+em `Services`, mantendo a arquitetura em camadas.
 
 Arquivos gerados durante a compilação (`bin` e `obj`) não são versionados.
 
@@ -280,3 +282,21 @@ Esta parte não altera o esquema do banco. Os testes verificam as permissões,
 os dados inválidos, a preservação das reservas, a reativação e a repetição de
 envios. O teste específico de desativação concorrente usa PostgreSQL real quando
 `RESERVAS_TEST_POSTGRES` está configurada.
+
+## Consulta administrativa de reservas (US10)
+
+Entre como administrador e abra **Todas as reservas**. A página apresenta os
+agendamentos de todos os usuários com número da reserva, sala, e-mail do
+responsável, data, horário, finalidade e situação. Os registros aparecem do mais
+recente para o mais antigo, incluindo reservas canceladas e de salas inativas.
+
+Essa página serve apenas para consulta. Ela não permite cancelar reservas de
+outras pessoas. Usuários comuns não têm acesso à página, mesmo usando seu
+endereço diretamente. As consultas pessoais continuam limitadas ao usuário
+autenticado.
+
+A consulta seleciona apenas os dados necessários à listagem, sem carregar dados
+de autenticação como hashes de senha. Esta parte não exige nova migration.
+Os testes verificam os responsáveis e dados exibidos, a ordenação, a lista vazia
+e as permissões. Com `RESERVAS_TEST_POSTGRES`, também verificam a consulta no
+PostgreSQL real.

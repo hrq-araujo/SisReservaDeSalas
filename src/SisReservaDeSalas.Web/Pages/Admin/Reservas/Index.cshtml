@@ -1,0 +1,38 @@
+@page
+@model SisReservaDeSalas.Web.Pages.Admin.Reservas.IndexModel
+@{
+    ViewData["Title"] = "Todas as reservas";
+}
+<section class="py-4">
+    <h1>Todas as reservas</h1>
+    <p>Consulte os agendamentos de todos os usuários, incluindo reservas canceladas e de salas inativas.</p>
+    @if (Model.Reservas.Count == 0)
+    {
+        <p>Nenhuma reserva registrada.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption>Agendamentos do mais recente para o mais antigo. Horário local de Maringá.</caption>
+                <thead>
+                    <tr><th scope="col">Reserva</th><th scope="col">Sala</th><th scope="col">Responsável</th><th scope="col">Data</th><th scope="col">Horário</th><th scope="col">Finalidade</th><th scope="col">Situação</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var reserva in Model.Reservas)
+                    {
+                        var situacao = !reserva.Ativa ? "Cancelada" : reserva.Inicio > Model.Agora ? "Agendada"
+                            : reserva.Fim <= Model.Agora ? "Encerrada" : "Em andamento";
+                        <tr>
+                            <td>@reserva.Id</td><td>@reserva.Sala</td><td>@reserva.Responsavel</td>
+                            <td>@reserva.Inicio.ToString("dd/MM/yyyy")</td>
+                            <td>@reserva.Inicio.ToString("HH:mm") às @reserva.Fim.ToString("HH:mm")</td>
+                            <td>@reserva.Finalidade</td>
+                            <td><span class="badge @(reserva.Ativa ? "text-bg-primary" : "text-bg-secondary")">@situacao</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

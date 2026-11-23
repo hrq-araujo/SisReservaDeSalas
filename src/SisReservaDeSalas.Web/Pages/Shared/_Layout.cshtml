@@ -12,7 +12,7 @@
     <header class="border-bottom bg-white">
         <nav class="container py-3 d-flex flex-wrap gap-3 align-items-center justify-content-between" aria-label="Navegação principal">
             <a class="navbar-brand fw-semibold" asp-page="/Index">Reserva de Salas</a>
-            <div class="d-flex gap-3 align-items-center">
+            <div class="d-flex flex-wrap gap-3 align-items-center">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <a asp-page="/Salas/Index">Salas</a>
@@ -21,6 +21,7 @@
                     @if (User.IsInRole(SisReservaDeSalas.Web.Models.Perfis.Administrador))
                     {
                         <a asp-page="/Admin/Salas/Index">Gerenciar salas</a>
+                        <a asp-page="/Admin/Reservas/Index">Todas as reservas</a>
                     }
                     <a asp-page="/Conta/Perfil">Minha conta</a>
                     <form method="post" asp-page="/Conta/Sair">

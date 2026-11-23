@@ -66,6 +66,12 @@ public class ReservaService(ReservaDbContext db)
             .Where(r => r.UsuarioId == usuarioId)
             .OrderByDescending(r => r.Inicio).ThenByDescending(r => r.Id).ToListAsync();
 
+    public Task<List<ReservaAdministrativa>> ListarAdministrativamenteAsync() =>
+        db.Reservas.AsNoTracking().OrderByDescending(r => r.Inicio).ThenByDescending(r => r.Id)
+            .Select(r => new ReservaAdministrativa(r.Id, r.Sala.Identificacao,
+                r.Usuario.Email ?? r.Usuario.UserName ?? "Usuário sem identificação",
+                r.Inicio, r.Fim, r.Finalidade, r.Ativa)).ToListAsync();
+
     public async Task<bool> CancelarAsync(int id, string usuarioId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(usuarioId);
