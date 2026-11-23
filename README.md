@@ -51,6 +51,7 @@ Na pasta do repositório, execute:
 
 ```shell
 dotnet restore
+dotnet tool restore
 dotnet build --no-restore
 dotnet run --project src/SisReservaDeSalas.Web
 ```
@@ -59,13 +60,62 @@ Acesse http://localhost:5212. Para encerrar, pressione `Ctrl+C` no terminal.
 
 ## Estado da implementação
 
-A primeira parte contém a solução .NET, a aplicação ASP.NET Core com Razor Pages,
-uma página inicial em português e uma página de erro. Ainda não há conexão com
-banco de dados, autenticação ou operações de salas e reservas.
+A aplicação contém a estrutura web, a página inicial e a configuração da
+persistência com EF Core e PostgreSQL. A entidade `Sala` e a migration
+`CriarTabelaSalas` estão disponíveis. Ainda não há autenticação nem telas de
+cadastro, consulta ou reserva.
 
 O projeto web está em `src/SisReservaDeSalas.Web`. As páginas ficam em `Pages`
-e os arquivos de estilo ficam em `wwwroot`. Os serviços de negócio e a persistência
-serão acrescentados nas próximas partes, mantendo a arquitetura em camadas.
+e os arquivos de estilo ficam em `wwwroot`. As entidades ficam em `Models`,
+e o contexto e as migrations ficam em `Data`. Os serviços de negócio serão
+acrescentados junto das funcionalidades, mantendo a arquitetura em camadas.
 
-EF Core foi escolhido na Etapa 2 e será configurado na parte de persistência.
 Arquivos gerados durante a compilação (`bin` e `obj`) não são versionados.
+
+## Configurar o banco de dados
+
+É necessário ter um servidor PostgreSQL em execução para aplicar as migrations
+e usar as operações de dados. A página inicial funciona sem o banco.
+
+O endereço padrão em `appsettings.json` aponta para `localhost:5432`, banco
+`sis_reserva_de_salas` e usuário `postgres`. Não há senha nesse arquivo.
+Para desenvolvimento, configure a conexão completa com User Secrets,
+substituindo `SUA_SENHA` pela senha do seu PostgreSQL:
+
+```shell
+dotnet user-secrets set "ConnectionStrings:ReservaDb" "Host=localhost;Port=5432;Database=sis_reserva_de_salas;Username=postgres;Password=SUA_SENHA" --project src/SisReservaDeSalas.Web
+dotnet ef database update --project src/SisReservaDeSalas.Web -- --environment Development
+```
+
+A senha é salva fora do repositório. O usuário do banco deve poder criar o banco
+de desenvolvimento; alternativamente, crie o banco antes com um administrador
+e conceda ao usuário da aplicação permissão para criar suas tabelas.
+
+As migrations são aplicadas explicitamente pelo comando acima; a aplicação
+não cria nem altera tabelas automaticamente ao iniciar.
+
+Para conferir as alterações de esquema sem conectar ao banco:
+
+```shell
+dotnet ef migrations script --project src/SisReservaDeSalas.Web
+dotnet ef migrations has-pending-model-changes --project src/SisReservaDeSalas.Web
+```
+
+## Tecnologias de persistência
+
+- EF Core 10.0.15 para o acesso aos dados e as migrations.
+- Npgsql.EntityFrameworkCore.PostgreSQL 10.0.4 como provedor do PostgreSQL.
+- Ferramenta local `dotnet-ef` 10.0.15, versionada em `dotnet-tools.json`.
+
+O PostgreSQL complementa a decisão da Etapa 2, que havia deixado o banco em
+aberto. Seu suporte a restrições de intervalos será utilizado na implementação
+das reservas para impedir sobreposições na mesma sala. Essa regra ainda não foi
+implementada nesta parte.
+
+A tabela `Salas` possui identificação (até 100 caracteres), localização (até 150),
+capacidade maior que zero, recursos opcionais (até 500) e situação ativa/inativa.
+As validações dos formulários serão implementadas junto das telas.
+
+Referências: [provedor Npgsql](https://www.npgsql.org/efcore/),
+[ferramentas EF Core](https://learn.microsoft.com/ef/core/cli/dotnet) e
+[restrições de intervalos no PostgreSQL](https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-CONSTRAINT).
