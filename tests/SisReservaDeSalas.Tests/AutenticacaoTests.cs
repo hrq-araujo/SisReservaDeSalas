@@ -80,7 +80,7 @@ public class AutenticacaoTests
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
-    private static async Task<HttpResponseMessage> Entrar(HttpClient client, string email, string senha, string? retorno = null)
+    internal static async Task<HttpResponseMessage> Entrar(HttpClient client, string email, string senha, string? retorno = null)
     {
         var pagina = await client.GetStringAsync("/Conta/Entrar");
         return await client.PostAsync("/Conta/Entrar?returnUrl=" + Uri.EscapeDataString(retorno ?? "/Conta/Perfil"),
@@ -91,7 +91,7 @@ public class AutenticacaoTests
             }));
     }
 
-    private static string Token(string html) => WebUtility.HtmlDecode(
+    internal static string Token(string html) => WebUtility.HtmlDecode(
         Regex.Match(html, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
 }
 

@@ -15,6 +15,7 @@
             <div class="d-flex gap-3 align-items-center">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
+                    <a asp-page="/Salas/Index">Salas</a>
                     <a asp-page="/Conta/Perfil">Minha conta</a>
                     <form method="post" asp-page="/Conta/Sair">
                         <button type="submit" class="btn btn-outline-secondary btn-sm">Sair</button>

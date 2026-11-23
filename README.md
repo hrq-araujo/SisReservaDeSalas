@@ -64,7 +64,9 @@ A aplicação contém a estrutura web, a página inicial e a configuração da
 persistência com EF Core e PostgreSQL. A entidade `Sala` e a migration
 `CriarTabelaSalas` estão disponíveis. O login, a saída e os perfis de usuário
 e administrador usam ASP.NET Core Identity, com a migration
-`AdicionarAutenticacao`. Ainda não há telas de cadastro de salas ou reservas.
+`AdicionarAutenticacao`. Administradores podem cadastrar salas; usuários
+autenticados podem listar salas ativas e consultar seus detalhes. Ainda não há
+operações de reservas, edição ou desativação de salas.
 
 O projeto web está em `src/SisReservaDeSalas.Web`. As páginas ficam em `Pages`
 e os arquivos de estilo ficam em `wwwroot`. As entidades ficam em `Models`,
@@ -158,9 +160,27 @@ dotnet test
 
 Os testes de integração verificam acesso sem login, entrada com cada perfil,
 saída, senha inválida, bloqueio por tentativas, recusa de redirecionamento externo
-e proteção contra envio de formulários sem token.
+e proteção contra envio de formulários sem token. Também verificam o cadastro
+de salas, a rejeição de dados inválidos, a restrição do cadastro ao administrador
+e a consulta apenas de salas ativas.
 Usam um SQLite temporário em memória, sem precisar configurar contas ou alterar
 o PostgreSQL. Eles não verificam a aplicação das migrations no PostgreSQL nem
 a concorrência de reservas, que será testada quando essa funcionalidade existir.
 
 Referência de autenticação: [ASP.NET Core Identity](https://learn.microsoft.com/aspnet/core/security/authentication/identity).
+
+## Cadastro e consulta de salas (US07 e US02)
+
+Após preparar o banco e as contas, entre como administrador, abra **Salas** e
+clique em **Cadastrar sala**. Informe identificação, localização e capacidade
+maior que zero. Os recursos são opcionais. A sala é criada ativa e o sistema
+abre seus detalhes após salvar.
+
+Contas do perfil usuário podem consultar as salas e seus detalhes, mas não
+podem acessar o cadastro, inclusive por uma solicitação direta ao servidor.
+Salas inativas não aparecem na listagem nem na consulta de detalhes.
+
+Os formulários enviam dados ao `SalaService`, que valida o cadastro e usa
+o `ReservaDbContext` para persistir as informações. As páginas não acessam
+o banco diretamente. Esta parte utiliza a tabela já criada pela migration
+`CriarTabelaSalas`, sem mudanças no esquema do banco.

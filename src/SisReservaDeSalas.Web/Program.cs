@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.Globalization;
 using SisReservaDeSalas.Web.Data;
+using SisReservaDeSalas.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<SalaService>();
 builder.Services.AddDbContext<ReservaDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ReservaDb")));
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>

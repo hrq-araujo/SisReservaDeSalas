@@ -1,0 +1,18 @@
+@page "{id:int}"
+@model SisReservaDeSalas.Web.Pages.Salas.DetalhesModel
+@{
+    ViewData["Title"] = "Detalhes da sala";
+}
+<section class="py-4">
+    @if (TempData["Sucesso"] is string mensagem)
+    {
+        <div class="alert alert-success" role="status">@mensagem</div>
+    }
+    <h1>@Model.Sala.Identificacao</h1>
+    <dl class="mt-4">
+        <dt>Localização</dt><dd>@Model.Sala.Localizacao</dd>
+        <dt>Capacidade</dt><dd>@Model.Sala.Capacidade pessoas</dd>
+        <dt>Recursos disponíveis</dt><dd>@(Model.Sala.Recursos ?? "Nenhum recurso informado.")</dd>
+    </dl>
+    <a asp-page="/Salas/Index">Voltar para salas</a>
+</section>

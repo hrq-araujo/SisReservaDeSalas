@@ -1,0 +1,39 @@
+@page
+@model SisReservaDeSalas.Web.Pages.Salas.IndexModel
+@using SisReservaDeSalas.Web.Models
+@{
+    ViewData["Title"] = "Salas";
+}
+<section class="py-4">
+    <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
+        <h1>Salas</h1>
+        @if (User.IsInRole(Perfis.Administrador))
+        {
+            <a asp-page="/Salas/Cadastrar" class="btn btn-primary">Cadastrar sala</a>
+        }
+    </div>
+    @if (Model.Salas.Count == 0)
+    {
+        <p>Nenhuma sala ativa cadastrada.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption>Salas ativas cadastradas no sistema.</caption>
+                <thead>
+                    <tr><th scope="col">Sala</th><th scope="col">Localização</th><th scope="col">Capacidade</th><th scope="col">Informações</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var sala in Model.Salas)
+                    {
+                        <tr>
+                            <td>@sala.Identificacao</td><td>@sala.Localizacao</td><td>@sala.Capacidade pessoas</td>
+                            <td><a asp-page="/Salas/Detalhes" asp-route-id="@sala.Id" aria-label="Detalhes de @sala.Identificacao">Ver detalhes</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
