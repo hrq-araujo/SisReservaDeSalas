@@ -42,3 +42,30 @@ O projeto será desenvolvido de forma incremental ao longo das etapas da discipl
 Na primeira etapa foram definidos o problema, o escopo, as histórias de usuário, o Product Backlog, a arquitetura inicial e o planejamento da primeira sprint.
 
 Os arquivos de implementação e demais componentes do projeto serão adicionados ao repositório durante as próximas etapas do desenvolvimento.
+
+## Executar a aplicação
+
+Pré-requisito: SDK .NET 10 instalado.
+
+Na pasta do repositório, execute:
+
+```shell
+dotnet restore
+dotnet build --no-restore
+dotnet run --project src/SisReservaDeSalas.Web
+```
+
+Acesse http://localhost:5212. Para encerrar, pressione `Ctrl+C` no terminal.
+
+## Estado da implementação
+
+A primeira parte contém a solução .NET, a aplicação ASP.NET Core com Razor Pages,
+uma página inicial em português e uma página de erro. Ainda não há conexão com
+banco de dados, autenticação ou operações de salas e reservas.
+
+O projeto web está em `src/SisReservaDeSalas.Web`. As páginas ficam em `Pages`
+e os arquivos de estilo ficam em `wwwroot`. Os serviços de negócio e a persistência
+serão acrescentados nas próximas partes, mantendo a arquitetura em camadas.
+
+EF Core foi escolhido na Etapa 2 e será configurado na parte de persistência.
+Arquivos gerados durante a compilação (`bin` e `obj`) não são versionados.

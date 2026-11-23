@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Reserva de Salas</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <a class="visually-hidden-focusable" href="#conteudo">Ir para o conteúdo</a>
+    <header class="border-bottom bg-white">
+        <nav class="container py-3" aria-label="Navegação principal">
+            <a class="navbar-brand fw-semibold" asp-page="/Index">Reserva de Salas</a>
+        </nav>
+    </header>
+    <main id="conteudo" class="container flex-grow-1">
+        @RenderBody()
+    </main>
+    <footer class="border-top py-3 text-secondary">
+        <div class="container">Sistema Web de Reserva de Salas Universitárias</div>
+    </footer>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
