@@ -15,4 +15,5 @@
         <dt>Recursos disponíveis</dt><dd>@(Model.Sala.Recursos ?? "Nenhum recurso informado.")</dd>
     </dl>
     <a asp-page="/Salas/Index">Voltar para salas</a>
+    <a asp-page="/Reservas/Criar" asp-route-salaId="@Model.Sala.Id" class="btn btn-primary ms-3">Reservar sala</a>
 </section>

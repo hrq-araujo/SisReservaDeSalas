@@ -20,6 +20,7 @@ namespace SisReservaDeSalas.Web.Data.Migrations
                 .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gist");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -218,6 +219,47 @@ namespace SisReservaDeSalas.Web.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SisReservaDeSalas.Web.Models.Reserva", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativa")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("Fim")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Finalidade")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("Inicio")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("SalaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("SalaId", "Inicio", "Fim");
+
+                    b.ToTable("Reservas", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Reservas_Periodo", "\"Fim\" > \"Inicio\"");
+                        });
+                });
+
             modelBuilder.Entity("SisReservaDeSalas.Web.Models.Sala", b =>
                 {
                     b.Property<int>("Id")
@@ -303,6 +345,25 @@ namespace SisReservaDeSalas.Web.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SisReservaDeSalas.Web.Models.Reserva", b =>
+                {
+                    b.HasOne("SisReservaDeSalas.Web.Models.Sala", "Sala")
+                        .WithMany()
+                        .HasForeignKey("SalaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Sala");
+
+                    b.Navigation("Usuario");
                 });
 #pragma warning restore 612, 618
         }

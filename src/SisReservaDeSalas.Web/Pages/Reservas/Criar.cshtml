@@ -1,0 +1,19 @@
+@page
+@model SisReservaDeSalas.Web.Pages.Reservas.CriarModel
+@{
+    ViewData["Title"] = "Reservar sala";
+}
+<section class="py-4 col-lg-7">
+    <h1>Reservar @Model.Sala.Identificacao</h1>
+    <p>@Model.Sala.Localizacao — @Model.Sala.Capacidade pessoas. Horário local de Maringá.</p>
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <input asp-for="Cadastro.SalaId" type="hidden" />
+        <div class="mb-3"><label asp-for="Cadastro.Data" class="form-label">Data</label><input asp-for="Cadastro.Data" class="form-control" /><span asp-validation-for="Cadastro.Data" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="Cadastro.HoraInicio" class="form-label">Início</label><input asp-for="Cadastro.HoraInicio" class="form-control" /><span asp-validation-for="Cadastro.HoraInicio" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="Cadastro.HoraFim" class="form-label">Fim</label><input asp-for="Cadastro.HoraFim" class="form-control" /><span asp-validation-for="Cadastro.HoraFim" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="Cadastro.Finalidade" class="form-label">Finalidade</label><textarea asp-for="Cadastro.Finalidade" rows="3" maxlength="200" class="form-control"></textarea><span asp-validation-for="Cadastro.Finalidade" class="text-danger"></span></div>
+        <button class="btn btn-primary" type="submit">Confirmar reserva</button>
+        <a asp-page="/Salas/Disponibilidade" class="btn btn-outline-secondary">Voltar</a>
+    </form>
+</section>

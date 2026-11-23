@@ -1,0 +1,34 @@
+@page
+@model SisReservaDeSalas.Web.Pages.Salas.DisponibilidadeModel
+@{
+    ViewData["Title"] = "Consultar disponibilidade";
+}
+<section class="py-4">
+    <h1>Consultar disponibilidade</h1>
+    <p>Informe a data e o período desejado. Os horários seguem o horário local da universidade, em Maringá.</p>
+    <form method="get" class="row g-3 mb-4">
+        <input type="hidden" name="consultar" value="true" />
+        <div class="col-md-4"><label asp-for="Periodo.Data" class="form-label">Data</label><input asp-for="Periodo.Data" class="form-control" /><span asp-validation-for="Periodo.Data" class="text-danger"></span></div>
+        <div class="col-md-3"><label asp-for="Periodo.HoraInicio" class="form-label">Início</label><input asp-for="Periodo.HoraInicio" class="form-control" /><span asp-validation-for="Periodo.HoraInicio" class="text-danger"></span></div>
+        <div class="col-md-3"><label asp-for="Periodo.HoraFim" class="form-label">Fim</label><input asp-for="Periodo.HoraFim" class="form-control" /><span asp-validation-for="Periodo.HoraFim" class="text-danger"></span></div>
+        <div class="col-12"><button class="btn btn-primary" type="submit">Consultar</button></div>
+    </form>
+    @if (Model.Consultou)
+    {
+        <h2>Salas disponíveis</h2>
+        <p>A disponibilidade será verificada novamente na confirmação da reserva.</p>
+        @if (Model.Salas.Count == 0) { <p>Nenhuma sala disponível nesse período.</p> }
+        <ul class="list-group">
+            @foreach (var sala in Model.Salas)
+            {
+                <li class="list-group-item d-flex flex-wrap justify-content-between gap-3">
+                    <span>@sala.Identificacao — @sala.Localizacao — @sala.Capacidade pessoas</span>
+                    <a asp-page="/Reservas/Criar" asp-route-salaId="@sala.Id"
+                       asp-route-data="@Model.Periodo.Data?.ToString("yyyy-MM-dd")"
+                       asp-route-horaInicio="@Model.Periodo.HoraInicio?.ToString("HH:mm")"
+                       asp-route-horaFim="@Model.Periodo.HoraFim?.ToString("HH:mm")">Reservar</a>
+                </li>
+            }
+        </ul>
+    }
+</section>

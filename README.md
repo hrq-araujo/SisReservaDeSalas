@@ -65,8 +65,9 @@ persistência com EF Core e PostgreSQL. A entidade `Sala` e a migration
 `CriarTabelaSalas` estão disponíveis. O login, a saída e os perfis de usuário
 e administrador usam ASP.NET Core Identity, com a migration
 `AdicionarAutenticacao`. Administradores podem cadastrar salas; usuários
-autenticados podem listar salas ativas e consultar seus detalhes. Ainda não há
-operações de reservas, edição ou desativação de salas.
+autenticados podem listar salas ativas e consultar seus detalhes. A consulta de
+disponibilidade e a confirmação de reservas estão implementadas. Ainda não há
+listagem de minhas reservas, cancelamento, edição ou desativação de salas.
 
 O projeto web está em `src/SisReservaDeSalas.Web`. As páginas ficam em `Pages`
 e os arquivos de estilo ficam em `wwwroot`. As entidades ficam em `Models`,
@@ -112,8 +113,7 @@ dotnet ef migrations has-pending-model-changes --project src/SisReservaDeSalas.W
 
 O PostgreSQL complementa a decisão da Etapa 2, que havia deixado o banco em
 aberto. Seu suporte a restrições de intervalos será utilizado na implementação
-das reservas para impedir sobreposições na mesma sala. Essa regra ainda não foi
-implementada nesta parte.
+das reservas para impedir sobreposições na mesma sala.
 
 A tabela `Salas` possui identificação (até 100 caracteres), localização (até 150),
 capacidade maior que zero, recursos opcionais (até 500) e situação ativa/inativa.
@@ -163,9 +163,9 @@ saída, senha inválida, bloqueio por tentativas, recusa de redirecionamento ext
 e proteção contra envio de formulários sem token. Também verificam o cadastro
 de salas, a rejeição de dados inválidos, a restrição do cadastro ao administrador
 e a consulta apenas de salas ativas.
-Usam um SQLite temporário em memória, sem precisar configurar contas ou alterar
-o PostgreSQL. Eles não verificam a aplicação das migrations no PostgreSQL nem
-a concorrência de reservas, que será testada quando essa funcionalidade existir.
+Por padrão, usam um SQLite temporário em memória, sem precisar configurar contas
+ou alterar o PostgreSQL. O teste específico de migrations e concorrência no
+PostgreSQL é ignorado quando a variável `RESERVAS_TEST_POSTGRES` não está definida.
 
 Referência de autenticação: [ASP.NET Core Identity](https://learn.microsoft.com/aspnet/core/security/authentication/identity).
 
@@ -184,3 +184,47 @@ Os formulários enviam dados ao `SalaService`, que valida o cadastro e usa
 o `ReservaDbContext` para persistir as informações. As páginas não acessam
 o banco diretamente. Esta parte utiliza a tabela já criada pela migration
 `CriarTabelaSalas`, sem mudanças no esquema do banco.
+
+## Disponibilidade e criação de reservas (US03 e US04)
+
+Aplique a migration `CriarReservas` com o mesmo comando `dotnet ef database update`
+descrito acima. Ela adiciona a tabela de reservas e a extensão `btree_gist`.
+O usuário que executa a migration precisa poder instalar essa extensão no banco;
+um administrador do PostgreSQL pode instalá-la previamente, se necessário.
+
+Entre no sistema e abra **Disponibilidade**. Informe data, início e fim para
+consultar as salas livres. Clique em **Reservar**, informe a finalidade e confirme.
+Também é possível iniciar a reserva pelos detalhes de uma sala.
+
+A reserva usa o usuário autenticado como responsável. A tela de confirmação só
+pode ser consultada por esse usuário. O sistema valida novamente a sala ativa e
+os conflitos no momento de salvar. O horário final deve ser posterior ao inicial,
+no mesmo dia; uma reserva das 9h às 10h permite outra começando às 10h.
+
+Os horários são tratados como horários locais da universidade em Maringá, sem
+conversão pelo fuso do computador ou do navegador. São armazenados como
+`timestamp without time zone`; esta primeira versão atende somente esse local.
+
+A restrição `EX_Reservas_SemSobreposicao` foi acrescentada explicitamente na
+migration para impedir sobreposição de reservas ativas na mesma sala. Ela é a
+proteção final contra confirmações simultâneas. Se outra pessoa ocupar o período,
+o formulário informa o conflito. Reservas inativas não bloqueiam o horário; a tela
+para cancelá-las será implementada na próxima parte.
+
+### Testar com PostgreSQL real
+
+Em PowerShell, configure uma conexão com um servidor de testes. Não use credenciais
+de produção. O usuário precisa poder criar bancos e instalar `btree_gist`:
+
+```powershell
+$env:RESERVAS_TEST_POSTGRES = "Host=localhost;Port=5432;Username=postgres;Password=SUA_SENHA"
+dotnet test
+Remove-Item Env:RESERVAS_TEST_POSTGRES
+```
+
+O teste cria um banco exclusivo com nome `reservas_test_` seguido de um identificador
+aleatório, aplica todas as migrations e remove esse banco ao finalizar. Ele força
+duas tentativas de reserva a chegar juntas à gravação, verifica que apenas uma
+é aceita e também verifica intervalos consecutivos e liberação por inativação.
+Os demais testes verificam o fluxo das páginas, períodos inválidos, disponibilidade,
+identificação do responsável e acesso à confirmação.

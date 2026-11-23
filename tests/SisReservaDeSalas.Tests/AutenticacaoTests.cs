@@ -95,9 +95,14 @@ public class AutenticacaoTests
         Regex.Match(html, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
 }
 
-internal class AplicacaoTeste : WebApplicationFactory<Program>
+internal class AplicacaoTeste(bool usarPostgres = false) : WebApplicationFactory<Program>
 {
     private readonly SqliteConnection connection = new("Data Source=:memory:");
+    public string? ConexaoPostgres { get; } = usarPostgres
+        ? new Npgsql.NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("RESERVAS_TEST_POSTGRES")
+            ?? throw new InvalidOperationException("Configure RESERVAS_TEST_POSTGRES."))
+            { Database = "reservas_test_" + Guid.NewGuid().ToString("N") }.ConnectionString
+        : null;
 
     public HttpClient CriarCliente() => CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
 
@@ -108,8 +113,13 @@ internal class AplicacaoTeste : WebApplicationFactory<Program>
         {
             services.RemoveAll<DbContextOptions<ReservaDbContext>>();
             services.RemoveAll<IDbContextOptionsConfiguration<ReservaDbContext>>();
-            connection.Open();
-            services.AddDbContext<ReservaDbContext>(options => options.UseSqlite(connection));
+            if (ConexaoPostgres is not null)
+                services.AddDbContext<ReservaDbContext>(options => options.UseNpgsql(ConexaoPostgres));
+            else
+            {
+                connection.Open();
+                services.AddDbContext<ReservaDbContext>(options => options.UseSqlite(connection));
+            }
         });
     }
 
@@ -117,7 +127,9 @@ internal class AplicacaoTeste : WebApplicationFactory<Program>
     {
         var host = base.CreateHost(builder);
         using var scope = host.Services.CreateScope();
-        scope.ServiceProvider.GetRequiredService<ReservaDbContext>().Database.EnsureCreated();
+        var db = scope.ServiceProvider.GetRequiredService<ReservaDbContext>();
+        if (ConexaoPostgres is not null) db.Database.Migrate();
+        else db.Database.EnsureCreated();
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["UsuariosIniciais:Administrador:Email"] = "admin@teste.local",
@@ -131,6 +143,11 @@ internal class AplicacaoTeste : WebApplicationFactory<Program>
 
     public override async ValueTask DisposeAsync()
     {
+        if (ConexaoPostgres is not null)
+        {
+            using var scope = Services.CreateScope();
+            await scope.ServiceProvider.GetRequiredService<ReservaDbContext>().Database.EnsureDeletedAsync();
+        }
         await base.DisposeAsync();
         await connection.DisposeAsync();
     }
