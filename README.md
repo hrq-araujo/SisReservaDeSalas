@@ -62,8 +62,9 @@ Acesse http://localhost:5212. Para encerrar, pressione `Ctrl+C` no terminal.
 
 A aplicação contém a estrutura web, a página inicial e a configuração da
 persistência com EF Core e PostgreSQL. A entidade `Sala` e a migration
-`CriarTabelaSalas` estão disponíveis. Ainda não há autenticação nem telas de
-cadastro, consulta ou reserva.
+`CriarTabelaSalas` estão disponíveis. O login, a saída e os perfis de usuário
+e administrador usam ASP.NET Core Identity, com a migration
+`AdicionarAutenticacao`. Ainda não há telas de cadastro de salas ou reservas.
 
 O projeto web está em `src/SisReservaDeSalas.Web`. As páginas ficam em `Pages`
 e os arquivos de estilo ficam em `wwwroot`. As entidades ficam em `Models`,
@@ -119,3 +120,47 @@ As validações dos formulários serão implementadas junto das telas.
 Referências: [provedor Npgsql](https://www.npgsql.org/efcore/),
 [ferramentas EF Core](https://learn.microsoft.com/ef/core/cli/dotnet) e
 [restrições de intervalos no PostgreSQL](https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-CONSTRAINT).
+
+## Login e usuários iniciais
+
+O login usa e-mail e senha de uma conta previamente cadastrada. Não há cadastro
+público de contas. O Identity armazena hashes de senhas e mantém os perfis
+`Usuario` e `Administrador`. Após cinco tentativas incorretas, a conta fica
+bloqueada por cinco minutos. A sessão não é persistente e expira após 30 minutos
+de inatividade.
+
+Depois de configurar a conexão e aplicar as migrations, configure as duas contas
+iniciais. Substitua os e-mails de exemplo e os valores `SUA_SENHA_FORTE` pelos
+dados que deseja usar. As senhas precisam ter pelo menos oito caracteres,
+incluindo letra maiúscula, minúscula, número e símbolo.
+
+```shell
+dotnet user-secrets set "UsuariosIniciais:Administrador:Email" "admin@exemplo.com" --project src/SisReservaDeSalas.Web
+dotnet user-secrets set "UsuariosIniciais:Administrador:Senha" "SUA_SENHA_FORTE" --project src/SisReservaDeSalas.Web
+dotnet user-secrets set "UsuariosIniciais:Usuario:Email" "usuario@exemplo.com" --project src/SisReservaDeSalas.Web
+dotnet user-secrets set "UsuariosIniciais:Usuario:Senha" "SUA_SENHA_FORTE" --project src/SisReservaDeSalas.Web
+dotnet run --project src/SisReservaDeSalas.Web -- --preparar-usuarios
+```
+
+O último comando cria as contas e os perfis e encerra a aplicação. Ele não aplica
+migrations. Pode ser repetido sem duplicar as contas e não altera a senha de
+uma conta existente. Use e-mails diferentes para os dois perfis.
+
+Para abrir o sistema, execute novamente sem `--preparar-usuarios` e clique em
+**Entrar**. A página **Minha conta** exige autenticação e mostra o perfil.
+A saída usa um formulário protegido contra falsificação de solicitações.
+
+## Testes
+
+```shell
+dotnet test
+```
+
+Os testes de integração verificam acesso sem login, entrada com cada perfil,
+saída, senha inválida, bloqueio por tentativas, recusa de redirecionamento externo
+e proteção contra envio de formulários sem token.
+Usam um SQLite temporário em memória, sem precisar configurar contas ou alterar
+o PostgreSQL. Eles não verificam a aplicação das migrations no PostgreSQL nem
+a concorrência de reservas, que será testada quando essa funcionalidade existir.
+
+Referência de autenticação: [ASP.NET Core Identity](https://learn.microsoft.com/aspnet/core/security/authentication/identity).

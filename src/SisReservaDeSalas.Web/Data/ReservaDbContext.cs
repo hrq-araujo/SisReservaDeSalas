@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using SisReservaDeSalas.Web.Models;
 
 namespace SisReservaDeSalas.Web.Data;
 
-public class ReservaDbContext(DbContextOptions<ReservaDbContext> options) : DbContext(options)
+public class ReservaDbContext(DbContextOptions<ReservaDbContext> options)
+    : IdentityDbContext<IdentityUser>(options)
 {
     public DbSet<Sala> Salas => Set<Sala>();
 

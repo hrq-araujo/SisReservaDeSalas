@@ -1,0 +1,11 @@
+@page
+@model SisReservaDeSalas.Web.Pages.Conta.PerfilModel
+@using SisReservaDeSalas.Web.Models
+@{
+    ViewData["Title"] = "Minha conta";
+}
+<section class="py-5">
+    <h1>Minha conta</h1>
+    <p>Você entrou como <strong>@User.Identity?.Name</strong>.</p>
+    <p>Perfil: @(User.IsInRole(Perfis.Administrador) ? "Administrador" : "Usuário")</p>
+</section>

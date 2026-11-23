@@ -10,8 +10,21 @@
 <body>
     <a class="visually-hidden-focusable" href="#conteudo">Ir para o conteúdo</a>
     <header class="border-bottom bg-white">
-        <nav class="container py-3" aria-label="Navegação principal">
+        <nav class="container py-3 d-flex flex-wrap gap-3 align-items-center justify-content-between" aria-label="Navegação principal">
             <a class="navbar-brand fw-semibold" asp-page="/Index">Reserva de Salas</a>
+            <div class="d-flex gap-3 align-items-center">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-page="/Conta/Perfil">Minha conta</a>
+                    <form method="post" asp-page="/Conta/Sair">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Sair</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-page="/Conta/Entrar">Entrar</a>
+                }
+            </div>
         </nav>
     </header>
     <main id="conteudo" class="container flex-grow-1">
