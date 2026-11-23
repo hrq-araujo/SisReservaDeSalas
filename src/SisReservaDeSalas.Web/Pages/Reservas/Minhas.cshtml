@@ -1,0 +1,48 @@
+@page
+@model SisReservaDeSalas.Web.Pages.Reservas.MinhasModel
+@{
+    ViewData["Title"] = "Minhas reservas";
+}
+<section class="py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1>Minhas reservas</h1>
+        <a asp-page="/Salas/Disponibilidade" class="btn btn-primary">Nova reserva</a>
+    </div>
+    @if (TempData["Sucesso"] is string mensagem)
+    {
+        <div class="alert alert-success" role="status">@mensagem</div>
+    }
+    @if (Model.Reservas.Count == 0)
+    {
+        <p>Você ainda não realizou reservas.</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <caption>Seus agendamentos, do mais recente para o mais antigo. Horário local de Maringá.</caption>
+                <thead><tr><th scope="col">Sala</th><th scope="col">Data</th><th scope="col">Horário</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead>
+                <tbody>
+                    @foreach (var reserva in Model.Reservas)
+                    {
+                        var situacao = !reserva.Ativa ? "Cancelada" : reserva.Inicio > Model.Agora ? "Agendada"
+                            : reserva.Fim <= Model.Agora ? "Encerrada" : "Em andamento";
+                        <tr>
+                            <td>@reserva.Sala.Identificacao</td>
+                            <td>@reserva.Inicio.ToString("dd/MM/yyyy")</td>
+                            <td>@reserva.Inicio.ToString("HH:mm") às @reserva.Fim.ToString("HH:mm")</td>
+                            <td><span class="badge @(reserva.Ativa ? "text-bg-primary" : "text-bg-secondary")">@situacao</span></td>
+                            <td>
+                                <a asp-page="/Reservas/Confirmacao" asp-route-id="@reserva.Id" aria-label="Detalhes da reserva @reserva.Id">Detalhes</a>
+                                @if (reserva.Ativa)
+                                {
+                                    <a asp-page="/Reservas/Cancelar" asp-route-id="@reserva.Id" class="ms-3" aria-label="Cancelar reserva @reserva.Id">Cancelar</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

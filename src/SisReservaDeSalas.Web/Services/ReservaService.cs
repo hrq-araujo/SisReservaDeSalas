@@ -53,4 +53,18 @@ public class ReservaService(ReservaDbContext db)
     public Task<Reserva?> BuscarDoUsuarioAsync(int id, string usuarioId) =>
         db.Reservas.AsNoTracking().Include(r => r.Sala)
             .SingleOrDefaultAsync(r => r.Id == id && r.UsuarioId == usuarioId);
+
+    public Task<List<Reserva>> ListarDoUsuarioAsync(string usuarioId) =>
+        db.Reservas.AsNoTracking().Include(r => r.Sala)
+            .Where(r => r.UsuarioId == usuarioId)
+            .OrderByDescending(r => r.Inicio).ThenByDescending(r => r.Id).ToListAsync();
+
+    public async Task<bool> CancelarAsync(int id, string usuarioId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(usuarioId);
+        // A condição de autoria faz parte do próprio UPDATE, inclusive em requisições simultâneas.
+        var alteradas = await db.Reservas.Where(r => r.Id == id && r.UsuarioId == usuarioId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(r => r.Ativa, false));
+        return alteradas > 0;
+    }
 }

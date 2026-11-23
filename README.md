@@ -66,8 +66,8 @@ persistência com EF Core e PostgreSQL. A entidade `Sala` e a migration
 e administrador usam ASP.NET Core Identity, com a migration
 `AdicionarAutenticacao`. Administradores podem cadastrar salas; usuários
 autenticados podem listar salas ativas e consultar seus detalhes. A consulta de
-disponibilidade e a confirmação de reservas estão implementadas. Ainda não há
-listagem de minhas reservas, cancelamento, edição ou desativação de salas.
+disponibilidade, a confirmação de reservas, a listagem de minhas reservas e
+o cancelamento estão implementados. Ainda não há edição ou desativação de salas.
 
 O projeto web está em `src/SisReservaDeSalas.Web`. As páginas ficam em `Pages`
 e os arquivos de estilo ficam em `wwwroot`. As entidades ficam em `Models`,
@@ -208,8 +208,7 @@ conversão pelo fuso do computador ou do navegador. São armazenados como
 A restrição `EX_Reservas_SemSobreposicao` foi acrescentada explicitamente na
 migration para impedir sobreposição de reservas ativas na mesma sala. Ela é a
 proteção final contra confirmações simultâneas. Se outra pessoa ocupar o período,
-o formulário informa o conflito. Reservas inativas não bloqueiam o horário; a tela
-para cancelá-las será implementada na próxima parte.
+o formulário informa o conflito. Reservas canceladas não bloqueiam o horário.
 
 ### Testar com PostgreSQL real
 
@@ -228,3 +227,26 @@ duas tentativas de reserva a chegar juntas à gravação, verifica que apenas um
 é aceita e também verifica intervalos consecutivos e liberação por inativação.
 Os demais testes verificam o fluxo das páginas, períodos inválidos, disponibilidade,
 identificação do responsável e acesso à confirmação.
+
+## Minhas reservas e cancelamento (US05 e US06)
+
+Entre no sistema e abra **Minhas reservas**. A página exibe somente os seus
+agendamentos, com sala, data, horário e situação: agendada, em andamento,
+encerrada ou cancelada. Os horários seguem o fuso de Maringá.
+
+Para cancelar, clique em **Cancelar**, confira os dados e confirme a operação.
+Abrir a página de confirmação não cancela nada. O envio usa um formulário com
+proteção contra falsificação de solicitações, e o servidor verifica o responsável
+pela reserva. Outro usuário, inclusive um administrador, não pode cancelar uma
+reserva alheia por esse fluxo.
+
+O cancelamento altera apenas a situação ativa da reserva. Sala, responsável,
+finalidade e período permanecem registrados. O horário fica livre após a gravação,
+e repetir o cancelamento da mesma reserva não afeta uma nova reserva nesse horário.
+O histórico pode ser consultado nos detalhes mesmo depois do cancelamento.
+
+Esta parte não altera o esquema do banco e não exige uma nova migration.
+Os testes verificam o isolamento das listas por usuário, as permissões de
+cancelamento, a proteção do formulário e a preservação do histórico. Com
+`RESERVAS_TEST_POSTGRES` configurada, também executam o cancelamento pela página
+e confirmam no PostgreSQL que uma nova reserva pode ocupar o horário liberado.

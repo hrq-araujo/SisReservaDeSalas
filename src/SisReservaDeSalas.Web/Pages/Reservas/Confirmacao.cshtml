@@ -1,15 +1,21 @@
 @page "{id:int}"
 @model SisReservaDeSalas.Web.Pages.Reservas.ConfirmacaoModel
 @{
-    ViewData["Title"] = "Reserva confirmada";
+    ViewData["Title"] = Model.Reserva.Ativa ? "Reserva confirmada" : "Reserva cancelada";
 }
 <section class="py-4">
-    <h1>Reserva confirmada</h1>
+    <h1>@ViewData["Title"]</h1>
     <dl>
         <dt>Sala</dt><dd>@Model.Reserva.Sala.Identificacao</dd>
         <dt>Data</dt><dd>@Model.Reserva.Inicio.ToString("dd/MM/yyyy")</dd>
         <dt>Horário</dt><dd>@Model.Reserva.Inicio.ToString("HH:mm") às @Model.Reserva.Fim.ToString("HH:mm") (Maringá)</dd>
         <dt>Finalidade</dt><dd>@Model.Reserva.Finalidade</dd>
+        <dt>Situação</dt><dd>@(Model.Reserva.Ativa ? "Confirmada" : "Cancelada")</dd>
     </dl>
     <a asp-page="/Salas/Disponibilidade">Consultar outro horário</a>
+    <a asp-page="/Reservas/Minhas" class="ms-3">Minhas reservas</a>
+    @if (Model.Reserva.Ativa)
+    {
+        <a asp-page="/Reservas/Cancelar" asp-route-id="@Model.Reserva.Id" class="btn btn-outline-danger ms-3">Cancelar reserva</a>
+    }
 </section>
